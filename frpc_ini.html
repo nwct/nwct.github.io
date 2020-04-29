@@ -1,0 +1,316 @@
+<html>
+ <head> 
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+  <title>FRPC在线配置系统</title> 
+  <meta name="Keywords" content="内网穿透、frp免费服务器、frpc一键脚本、frps一键脚本、端口映射、frp、frpc、frps、frpc在线配置" /> 
+  <meta name="description" content="" /> 
+   <script>
+function getParent (el, parentTag) {
+    do {
+        el = el.parentNode;
+    } while (el && el.tagName !== parentTag);
+    return el;
+}
+ 
+function removeTr (el) {
+    el = getParent(el, 'TR');
+    var rowIndex = el.rowIndex;
+    el = getParent(el, 'TABLE');
+    el.deleteRow(rowIndex);
+//	alert("行号：" + rowIndex );
+}
+</script>
+	 
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?de49f249b7a4558c7daed4df3419bf49";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+ </head> 
+ <body id="frpcini"> 
+  <center> 
+   <br /> 
+   <h2 align="center">FRPC在线配置系统</h2> 
+   <form id="frpc_ini" > 
+    <br /> 
+    <table align="center" border="1" cellpadding="1" cellspacing="0"> 
+     <tbody> 
+      <tr align="center" bgcolor="#66CCCC"> 
+       <th>FRP版本</th>
+	   <th>服务器地址</th> 
+       <th>连接端口</th> 
+       <th>特权密码</th> 
+      </tr> 
+      <tr align="center" bgcolor="#66CCCC"> 
+		<td>
+			<select name="version" id="version" />
+				<option value="0.9.3">0.9.3</option>
+				<option value="0.16.1">0.16.1</option>
+				<option value="0.24.1">0.24.1</option>
+			</select>
+		</td>
+       <td><input type="text" name="server_addr" id="server_addr" value="frp.lu8.win" autofocus="" /> </td> 
+       <td><input type="number" name="server_port" id="server_port" min="1" max="65535" value="7000" /> </td> 
+       <td><input type="text" name="privilege_token" id="privilege_token" value="frp888" /></td> 
+      </tr> 
+     </tbody> 
+    </table> 
+    <br /> 
+    <br /> 
+    <table align="center" width="100%"> 
+     <tbody> 
+      <tr> 
+       <td> 
+        <table align="center" border="1" id="planTable" cellpadding="1" cellspacing="0"> 
+         <tbody> 
+          <tr align="center" bgcolor="#00FF00" color="red" onmouseover=""> 
+           <th>序号</th> 
+           <th>隧道名称</th> 
+           <th>协议</th> 
+           <th>本地IP/要访问的隧道名</th> 
+           <th>本地端口</th> 
+           <th>自定义域名/远程端口/sk密码</th> 
+           <th>加密</th> 
+           <th>压缩</th> 
+           <th>访问者</th>  
+		   <th>操作</th>
+          </tr> 
+         </tbody> 
+        </table> </td> 
+      </tr> 
+     </tbody> 
+    </table> 
+    <table>
+      &nbsp; 
+    </table> 
+    <table>
+      &nbsp; 
+    </table> 
+    <div align="center"> 
+     <input name="add" type="button" onclick="addLine()" value="新增隧道" /> &nbsp; 
+     <input name="del" type="button" onclick="delLine()" value="删除隧道" /> &nbsp; 
+     <input name="down" type="button" onclick="down_ini()" value="查看并下载配置文件" /> &nbsp; 
+    </div> 
+   </form> 
+  </center> 
+  <script language="javascript">
+
+	var a=0;
+function addLine(){
+    var newLine = planTable.rows.length;
+    var row = planTable.insertRow(newLine); 
+	a=a+1;
+	r=Math.floor(Math.random()*65535+1); 
+	var col = row.insertCell(0); 	
+    col.innerHTML = a;
+    var col = row.insertCell(1);    
+    col.innerHTML = "<input name=suidao_name id=suidao_name"+a+" type=text value=lu8.win_"+r+" placeholder=只支持字母和数字 size=12 required=required onkeyup=value=value.replace(/[^a-zA-Z0-9-_*~+=.]/g,'')>";
+    col = row.insertCell(2);
+    col.innerHTML = "<select name=type id=type"+a+"><option value=http>HTTP</option><option value=https>HTTPS</option><option value=tcp>TCP</option><option value=udp>UDP</option><option value=stcp>STCP</option><option value=xtcp>XTCP</option></select>";
+    col = row.insertCell(3);
+    col.innerHTML = "<input name=local_ip id=local_ip"+a+" value=127.0.0.1 type=text size=12 >";
+    col = row.insertCell(4);
+    col.innerHTML = "<input type=number name=local_port id=local_port"+a+" min=1 max=65535 value=80 >";
+	col = row.insertCell(5);
+    col.innerHTML = "<input name=remote_info id=remote_info"+a+" type=text placeholder=填写自定义域名或远程端口 required=required  onkeyup=value=value.replace(/[^a-zA-Z0-9-_*~+=.]/g,'') >";
+	col = row.insertCell(6);
+    col.innerHTML = "<select name=use_encryption id=use_encryption"+a+" /> <option value=>否</option> <option value=true>是</option></select>";
+	col = row.insertCell(7);
+    col.innerHTML = "<select name=use_gzip id=use_gzip"+a+" /><option value=>否</option> <option value=true>是</option></select>";
+	col = row.insertCell(8);
+    col.innerHTML = "<select name=role id=role"+a+" /> <option value=>否</option> <option value=visitor>是</option></select>";
+	col = row.insertCell(9);
+    col.innerHTML = "<input type=button onclick=removeTr(this) value=删除 />";
+	row.align = "center";	
+	
+    return newLine;
+}
+
+function delLine(){
+    var i;
+    var count;
+    count = planTable.rows.length;
+    if(count>2){
+    planTable.deleteRow(planTable.rows.length-1)
+        for(i=0;i<count-1;i++){
+          //  if(document.chk[i].checked){
+         //       alert("aa");
+         //   }
+        }
+	a=a-1
+    }
+}
+
+
+function down_ini(){
+
+//提示信息
+alert("1、检查生成的配置文件是否正确。\r" +
+"2、确认配置文件完全正确后，下载配置文件！\r"
+ );
+
+var version=document.getElementById("version").value;
+var privilegetoken;
+var privilegemode;
+var useencryption;
+var usecompression;
+
+if (version == "0.9.3") {
+	privilegetoken = "privilege_token";
+	privilegemode = "privilege_mode = true" + "\r";
+	useencryption = "use_encryption";
+	usecompression = "use_gzip";
+} else if (version == "0.16.1") {
+	privilegetoken = "privilege_token";
+	privilegemode = "";
+	useencryption = "use_encryption";
+	usecompression = "use_compression";
+} else if (version == "0.24.1") {
+	privilegetoken = "token";
+	privilegemode = "";
+	useencryption = "use_encryption";
+	usecompression = "use_compression";
+} else {
+	privilegetoken = "token";
+	privilegemode = "";
+	useencryption = "use_encryption";
+	usecompression = "use_compression";
+};
+
+//表格信息处理
+var server_addr=document.getElementById("server_addr").value;
+var server_port=document.getElementById("server_port").value;
+var privilege_token=document.getElementById("privilege_token").value;
+
+var s="[common]" +"\r" +
+"server_addr = " + server_addr +"\r" +
+"server_port = " + server_port +"\r" +
+privilegetoken + " = " + privilege_token +"\r" +
+"log_file = frpc.log " + "\r" +
+"log_level = info " + "\r" +
+"log_max_days = 7 " + "\r" +
+"\r"
+;
+
+var c="";
+var rows=0;
+for(var i=1;i<a+1;i++){
+
+var idvalue=document.getElementById("suidao_name" + i);
+
+//if (idvalue == null) {
+//i=i+1
+//};
+
+while (idvalue == null)
+  {
+	i=i+1
+	idvalue=document.getElementById("suidao_name" + i);
+  };
+  
+//alert("行号："+i+"  信息："+idvalue);
+var suidao_name=document.getElementById("suidao_name" + i).value;
+var type=document.getElementById("type"+ i).value;
+var local_ip=document.getElementById("local_ip"+ i).value;
+var local_port=document.getElementById("local_port"+ i).value;
+var remote_info=document.getElementById("remote_info"+ i).value;
+var use_encryption=document.getElementById("use_encryption"+ i).value;
+var use_gzip=document.getElementById("use_gzip"+ i).value;
+var role=document.getElementById("role"+ i).value;
+
+var remote;
+if (type == "http" || type == "https") {
+	remote = "custom_domains";
+} else if (type == "tcp" || type == "udp") {
+	remote = "remote_port";
+} else {
+	remote = "sk";
+};
+if (use_encryption == "true") {
+	use_encryption = useencryption + " = true" + "\r";
+} else {
+	use_encryption = "";
+};
+if (use_gzip == "true") {
+	use_gzip = usecompression + " = true" + "\r";
+} else {
+	use_gzip = "";
+};
+
+var localip="";
+var localip2="";
+var localport="";
+var visitor="";
+if ((type == "stcp" && role == "visitor") || (type == "xtcp" && role == "visitor")) {
+	visitor = "_visitor";
+	role = "role = visitor" + "\r";
+	localip = "server_name";
+	localip2 = "bind_addr = 127.0.0.1" + "\r";
+	localport = "bind_port";
+
+} else {
+	role = "";
+	localip = "local_ip";
+	localport = "local_port";
+};
+
+c=c + 
+"[" + suidao_name + visitor + "]" +"\r" +
+"type = " + type +"\r" +
+privilegemode +
+localip + " = " + local_ip +"\r" +
+localport + " = " + local_port +"\r" +
+localip2 +
+remote + " = " + remote_info +"\r" +
+role +
+use_encryption +
+use_gzip +
+"\r" 
+;
+
+
+rows = rows + 11;
+
+if (privilegemode == "") {
+	rows = rows - 1;
+};
+
+if (role == "") {
+	rows = rows - 1;
+};
+
+if (localip2 == "") {
+	rows = rows - 1;
+};
+
+if (use_encryption == "") {
+	rows = rows - 1;
+};
+
+if (use_gzip == "") {
+	rows = rows - 1;
+};
+
+
+}
+
+
+//生成下载页面
+var h=9+rows
+document.write("<p align=center><br><input type=button value=下载frpc.ini文件></p>"+"\r\n");
+document.write("<p align=center>"+"\r\n"+"<textarea rows="+h+" cols=45 >"+"\r\n"+s+c+"</textarea>"+"\r\n"+"</p>"+"\r\n");
+document.write("<script src=http://www.lu8.win/js/frpc.js><\/script>");
+
+}
+
+
+
+</script>  
+ </body>
+</html>
